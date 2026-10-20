@@ -1,0 +1,7 @@
+[mcp_servers.ricochet_unreal]
+command = "C:/Users/MSI/Documents/Unreal Projects/Rikoshet/.venv/Scripts/python.exe"
+args = ["C:/Users/MSI/Documents/Unreal Projects/Rikoshet/Tools/ue_mcp.py"]
+cwd = "C:/Users/MSI/Documents/Unreal Projects/Rikoshet"
+startup_timeout_sec = 30
+tool_timeout_sec = 60
+enabled = true

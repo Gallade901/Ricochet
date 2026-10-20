@@ -1,0 +1,53 @@
+"""Run inside Unreal Editor only. Creates a Blueprint subclass of StaticMeshActor (an Actor).
+No gameplay logic or Blueprint graph nodes are generated.
+"""
+import json
+from pathlib import Path
+import unreal
+
+NAME = "BP_TestCube"
+PACKAGE = "/Game/RicochetArena/Blueprints/Test"
+ASSET = PACKAGE + "/" + NAME
+
+def main():
+    version = unreal.SystemLibrary.get_engine_version()
+    if not version.startswith("5.8."):
+        raise RuntimeError("Expected Unreal 5.8, got " + version)
+    # Refuse to alter any pre-existing asset.
+    if unreal.EditorAssetLibrary.does_asset_exist(ASSET):
+        raise RuntimeError("Asset already exists; inspect it manually: " + ASSET)
+    factory = unreal.BlueprintFactory()
+    factory.set_editor_property("parent_class", unreal.StaticMeshActor)
+    blueprint = unreal.AssetToolsHelpers.get_asset_tools().create_asset(
+        NAME, PACKAGE, unreal.Blueprint, factory)
+    if not blueprint:
+        raise RuntimeError("Blueprint factory returned no asset")
+    generated = blueprint.generated_class()
+    if not generated:
+        raise RuntimeError("Blueprint has no generated class")
+    defaults = unreal.get_default_object(generated)
+    component = defaults.get_editor_property("static_mesh_component")
+    cube = unreal.load_asset("/Engine/BasicShapes/Cube")
+    if not component or not cube:
+        raise RuntimeError("Cube mesh/component missing")
+    component.set_static_mesh(cube)
+    unreal.BlueprintEditorLibrary.compile_blueprint(blueprint)
+    if not unreal.EditorAssetLibrary.save_loaded_asset(blueprint, False):
+        raise RuntimeError("Saving Blueprint failed")
+    loaded = unreal.load_asset(ASSET)
+    cls = loaded.generated_class() if loaded else None
+    if not cls or not unreal.MathLibrary.class_is_child_of(cls, unreal.Actor):
+        raise RuntimeError("Saved asset is not a generated Actor Blueprint")
+    mesh = unreal.get_default_object(cls).get_editor_property("static_mesh_component").get_editor_property("static_mesh")
+    if mesh != cube:
+        raise RuntimeError("Saved Blueprint cube mesh verification failed")
+    report = {"asset": ASSET, "engine": version, "actor_blueprint": True,
+              "cube_mesh": mesh.get_path_name(), "saved": True,
+              "gameplay_graph_created": False}
+    destination = Path(unreal.Paths.project_saved_dir()) / "Automation" / (NAME + ".json")
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_text(json.dumps(report, indent=2), encoding="utf-8")
+    unreal.log("RICOCHET_BLUEPRINT_VERIFIED " + json.dumps(report))
+
+if __name__ == "__main__":
+    main()

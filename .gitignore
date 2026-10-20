@@ -12,3 +12,7 @@ Saved/
 *.sdf
 *.opendb
 *.VC.opendb
+# Local Python automation
+.venv/
+__pycache__/
+*.pyc
