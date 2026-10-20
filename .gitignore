@@ -1,0 +1,14 @@
+# Папки, генерируемые Unreal Engine
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+
+# Файлы, специфичные для Visual Studio / Rider
+*.sln
+*.suo
+*.VC.db
+*.opensdf
+*.sdf
+*.opendb
+*.VC.opendb
