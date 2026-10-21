@@ -34,3 +34,36 @@ Setting: abandoned science-fiction experimental ricochet weapons test arena.
 - Run Tools/verify_mcp.py for real stdio initialization, tool discovery and calls.
 - Unreal verification evidence: Saved/Automation/BP_TestCube.json plus editor log.
 - .codex/config.toml contains machine-specific absolute paths. Restart Codex after configuration.
+
+## Implemented core mechanics
+- Runtime Blueprints: /Game/RicochetArena/CoreMechanics. See Tools/CORE_MECHANICS.md.
+- Player: WASD via CharacterMovement, mouse aim, held-LMB fire, Microchips balance.
+- Projectile: swept sphere, planar ProjectileMovement, no gravity, 6s lifespan, max 8 ricochets.
+- Only RicochetWall-tagged actors enable HasRicocheted. GetRobotDamage returns zero until then.
+- Microchip: automatic player overlap, Collected guard, per-instance Value.
+- HUD displays controls and resources; GameMode assigns player, controller and HUD.
+- Lvl_RicochetPrototype is the default playable map. Original TopDown assets preserved.
+- Lvl_CoreAutomation and BP_RA_CoreRuntimeTest are tests; the test map quits automatically.
+- Test robot health, ricochet-gated damage and death are implemented. Chip drops, waves and upgrades remain pending.
+
+## Core automation safeguards
+- build_core_mechanics.py uses Epic EditorToolset and official BlueprintGraphEditor APIs.
+- EditorToolset is enabled only by automation command line. Runtime is Blueprint only.
+- Authoring scripts refuse to overwrite saved assets; do not rerun against existing assets.
+- Tools/test_core_runtime.ps1 repeats actual gameplay checks.
+- Evidence: Saved/Automation/CoreMechanics and Saved/Logs/CoreRuntime.log.
+- Back up existing assets before modifications, compile graphs and run relevant checks.
+
+## Implemented test robot
+- /Game/RicochetArena/Robot/BP_RA_TestRobot is placed once in Lvl_RicochetPrototype at (-350,250,85).
+- Stationary primitive robot model, MaxHealth 100, CurrentHealth, IsDead and screen-space WBP_RA_RobotHealth.
+- The robot is a WorldDynamic Actor with blocking collision, not a Pawn ignored by projectiles.
+- Projectile RegisterWallHit retains wall bounce logic and applies damage to RicochetRobot-tagged actors only after GetRobotDamage > 0.
+- Robot ReceiveAnyDamage independently checks the projectile source and ricochet state; clamps damage and health; ignores hits after death.
+- ImpactConsumed prevents repeat damage per projectile impact. Default damage is 25 (four bounced hits to kill).
+- Die disables collision, calls HandleRobotDestroyed, and removes the actor after one second.
+- ChipDropValue is reserved for future drops; no chip drop is implemented.
+- Tools/test_robot_runtime.ps1 repeats 13 gameplay checks. Existing 12 core gameplay checks also pass.
+- Robot authoring requires built-in EditorToolset and UMGToolSet only during automation; no runtime Python dependency.
+- Robot build/placement scripts back up existing projectile and map files before editor-based modification.
+- Evidence: Saved/Automation/Robot and Saved/Logs/RobotRuntime.log; usage: Tools/TEST_ROBOT.md.
