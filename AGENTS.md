@@ -67,3 +67,22 @@ Setting: abandoned science-fiction experimental ricochet weapons test arena.
 - Robot authoring requires built-in EditorToolset and UMGToolSet only during automation; no runtime Python dependency.
 - Robot build/placement scripts back up existing projectile and map files before editor-based modification.
 - Evidence: Saved/Automation/Robot and Saved/Logs/RobotRuntime.log; usage: Tools/TEST_ROBOT.md.
+
+## Implemented shop, pursuit AI and phase ability
+- See Tools/PROGRESSION.md. Runtime remains Blueprint-only; built-in editor toolsets are authoring dependencies only.
+- Tab opens WBP_RA_UpgradeShop; a modal pause with a Close/Continue button and input restoration.
+- Currency is Microchips. Damage +10 and shot interval x0.85 cost 5+5*level; separate levels capped at 8.
+- The phase ability is purchased once for 15 points. E activates for 5 game seconds, with 30 seconds between starts.
+- Phase replaces body/weapon materials with translucent M_RA_Phase, restores originals, and disables robot pursuit/attacks.
+- Player has 100 HP, guarded ReceiveRobotDamage and a death state; R restarts the level. Progress is per run.
+- BP_RA_HunterRobot is a child of the unchanged BP_RA_TestRobot, with NavMesh paths, swept movement and melee LOS checks.
+- Hunter collision is 30x30x80 at root Z85, clears the floor and does not affect navigation generation.
+- Hunter death drops one BP_RA_Microchip with Value=5 initialized before overlap. Value is ExposeOnSpawn.
+- BP_RA_RobotDirector on Lvl_RicochetPrototype starts at 3s, spawns every 4s, caps live hunters at 6, stops after player death.
+- Dynamic navigation is configured in DefaultEngine.ini; prototype has a NavMeshBoundsVolume.
+- Player input/aim nodes, original projectile/ricochet graph, bullet material, and original test robot were preserved.
+- New assets: /Game/RicochetArena/Progression. Test map Lvl_ProgressionAutomation auto-quits.
+- Tools/test_progression_runtime.ps1 passes 40 gameplay checks, alongside the existing 12 core and 13 robot checks.
+- Authoring generators refuse existing assets; inspect and back up before subsequent changes. Do not rerun a generator over saved player features.
+- Backups: Saved/AutomationBackups/Progression_20261110_203909 and per-stage Progression* directories.
+- Evidence: Saved/Automation/Progression and Saved/Logs/ProgressionRuntime.log.
