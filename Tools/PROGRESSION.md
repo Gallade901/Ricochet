@@ -94,3 +94,31 @@ RecastNavMesh в Config/DefaultEngine.ini. Коллизия охотника и�
 Исходная резервная копия:
 Saved/AutomationBackups/Progression_20261110_203909.
 Дополнительные копии отдельных этапов также находятся в Saved/AutomationBackups.
+
+
+## Исправления коллизии подбора и ввода после мастерской (11 ноября 2026)
+
+- BP_RA_Microchip / PickupSphere: QueryOnly, Ignore для всех каналов кроме
+  Pawn=Overlap. Визуальная модель остаётся без коллизии. Снаряды пролетают через
+  чип; подбор игроком и защита от повторного начисления сохранены.
+- BP_RA_PlayerCharacter / ToggleUpgradeShop: после существующего
+  SetInputMode_GameOnly добавлены SetViewportMouseCaptureMode с режимом
+  CapturePermanently_IncludingInitialMouseDown и SetFocusToGameViewport.
+  Режим передаёт нажатие, захватившее мышь, игровому вводу.
+- Существующие узлы и соединения сохранены. Снаряд, рикошет, управление движением,
+  роботы, основная карта и настройки проекта не изменялись этим исправлением.
+- Tools/test_input_pickup_runtime.ps1: 16 проверок в отдельной карте
+  /Game/RicochetArena/Progression/Lvl_InputPickupAutomation. Проверяются три цикла
+  мастерской и фактический режим захвата, физический пролёт снаряда, отсутствие
+  ложного рикошета, сохранение чипа и подбор игроком ровно один раз.
+- Повторно пройдены test_core_runtime.ps1 (12), test_robot_runtime.ps1 (13),
+  test_progression_runtime.ps1 (40). Итого 81 проверка; без Blueprint Runtime Error
+  и Accessed None. Повторная загрузка ассетов проверена отдельным процессом UE.
+- Новая проверка работает с -nullrhi: она проверяет состояние захвата, а не
+  физические клики мышью. Визуальную проверку выполните в Play: после мастерской
+  несколько раз зажмите/отпустите ЛКМ с паузой между нажатиями.
+- Подтверждения: Saved/Automation/InputPickupFix и Saved/Logs/InputPickup*.log.
+  Резервные копии исходных ассетов: Saved/AutomationBackups/InputPickupFix_*.
+- fix_input_pickup.py — одноразовый патч, повторно запускать на исправленном
+  ассете нельзя. build_input_pickup_tests.py создаёт только новые тестовые ассеты
+  и отказывается от перезаписи существующих.
